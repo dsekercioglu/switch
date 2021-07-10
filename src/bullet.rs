@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::world::{BounceMarker, Velocity, ObjectMarker, DefaultSize, MaterialResource, Location, Counter, CharType};
+use crate::player::PLAYER_SIZE;
 
 const SIZE: f32 = 7.5f32;
 const BULLET_VELOCITY: f32 = 275f32;
@@ -18,10 +19,11 @@ pub struct BulletBundle {
     counter: Counter,
 }
 
-pub fn new_bullet(target: Vec2, source: Vec2, team: u8, material: Handle<ColorMaterial>) -> BulletBundle {
+pub fn new_bullet(target: Vec2, source: Vec2, material: Handle<ColorMaterial>) -> BulletBundle {
+    let dir = (target - source).normalize();
     BulletBundle {
         marker: BounceMarker,
-        obj_marker: ObjectMarker(team),
+        obj_marker: ObjectMarker(2),
         type_marker: CharType::Bullet,
         sprite: SpriteBundle {
             sprite: Sprite::new(Vec2::new(SIZE, SIZE)),
@@ -33,8 +35,8 @@ pub fn new_bullet(target: Vec2, source: Vec2, team: u8, material: Handle<ColorMa
             width: SIZE,
             height: SIZE,
         },
-        location: Location(Vec2::new(source.x, source.y)),
+        location: Location(Vec2::new(source.x, source.y) + PLAYER_SIZE * dir),
         counter: Counter(TIME),
-        velocity: Velocity((target - source).normalize() * BULLET_VELOCITY),
+        velocity: Velocity(dir * BULLET_VELOCITY),
     }
 }

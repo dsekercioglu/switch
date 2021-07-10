@@ -4,9 +4,9 @@ use crate::walls::WallDeathMarker;
 use crate::bullet::new_bullet;
 use std::collections::VecDeque;
 
-const POWER: f32 = 175f32;
+pub const PLAYER_SIZE: f32 = 20f32;
 
-const PLAYER_SIZE: f32 = 20f32;
+const POWER: f32 = 175f32;
 
 const TEAM: u8 = 0;
 
@@ -82,7 +82,11 @@ pub fn mouse_click(mut commands: Commands,
                         location.0.x,
                         location.0.y,
                     );
-                    commands.spawn_bundle(new_bullet(mouse_loc.location, source, marker.0, materials.bullet_material.clone()));
+                    commands.spawn_bundle(new_bullet(
+                        mouse_loc.location,
+                        source,
+                        materials.bullet_material.clone(),
+                    ));
                 }
                 switch.0 = !switch.0;
             }
