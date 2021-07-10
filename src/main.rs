@@ -8,7 +8,7 @@ mod audio;
 
 use bevy::prelude::*;
 use crate::world::{init_material, setup, setup_mouse, cursor_system, size_scaling, setup_walls, handle_object_collision, handle_bounce, position_translation, update_counters, spawn_system, init_spawn, slide_move, clear_world, init_background, remove_background};
-use crate::player::{mouse_click, new_player};
+use crate::player::{mouse_click, new_player, update_cool_down};
 use crate::walls::handle_walls;
 use crate::enemies::{move_bouncing_enemy, homing_mine_spin, update_mines};
 use bevy::input::system::exit_on_esc_system;
@@ -75,7 +75,8 @@ fn main() {
             .with_system(spawn_system.system())
             .with_system(homing_mine_spin.system())
             .with_system(update_mines.system())
-            .with_system(timer.system()))
+            .with_system(timer.system())
+            .with_system(update_cool_down.system()))
         .add_system_set(SystemSet::on_exit(GameState::Game)
             .with_system(remove_timer.system())
             .with_system(clear_world.system())
