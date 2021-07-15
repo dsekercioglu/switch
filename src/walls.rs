@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use crate::world::{DefaultSize, MaterialResource, Location, CharType};
-use bevy::sprite::collide_aabb::{collide, Collision};
+use crate::world::{CharType, DefaultSize, Location, MaterialResource};
 use crate::GameState;
+use bevy::prelude::*;
+use bevy::sprite::collide_aabb::{collide, Collision};
 
 pub struct WallMarker;
 
@@ -14,9 +14,7 @@ pub struct WallBundle {
     location: Location,
 }
 
-pub fn new_wall(material: Handle<ColorMaterial>,
-                translation: Vec2,
-                size: Vec2) -> WallBundle {
+pub fn new_wall(material: Handle<ColorMaterial>, translation: Vec2, size: Vec2) -> WallBundle {
     let size = DefaultSize {
         width: size.x,
         height: size.y,
@@ -38,16 +36,21 @@ pub fn new_wall(material: Handle<ColorMaterial>,
 
 pub struct WallDeathMarker;
 
-pub fn handle_walls(mut commands: Commands,
-                    characters: Query<(&WallDeathMarker, Entity, &Location, &DefaultSize, &CharType)>,
-                    walls: Query<(&WallMarker, &Location, &DefaultSize)>,
-                    mut state: ResMut<State<GameState>>) {
+pub fn handle_walls(
+    mut commands: Commands,
+    characters: Query<(&WallDeathMarker, Entity, &Location, &DefaultSize, &CharType)>,
+    walls: Query<(&WallMarker, &Location, &DefaultSize)>,
+    mut state: ResMut<State<GameState>>,
+) {
     for (_, wall_location, wall_size) in walls.iter() {
         for (_, entity, location, size, char_type) in characters.iter() {
-            if collide(Vec3::new(wall_location.0.x, wall_location.0.y, 0f32),
-                       Vec2::new(size.width, size.height),
-                       Vec3::new(location.0.x, location.0.y, 0f32),
-                       Vec2::new(wall_size.width, wall_size.height)).is_some() {
+            if collide(
+                Vec3::new(wall_location.0.x, wall_location.0.y, 0f32),
+                Vec2::new(size.width, size.height),
+                Vec3::new(location.0.x, location.0.y, 0f32),
+                Vec2::new(wall_size.width, wall_size.height),
+            ).is_some()
+            {
                 if *char_type == CharType::Player {
                     state.set(GameState::Menu).unwrap_or(());
                 }

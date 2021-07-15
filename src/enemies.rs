@@ -1,15 +1,16 @@
+use crate::player::PlayerMarker;
+use crate::walls::{WallDeathMarker, WallMarker};
+use crate::world::{
+    BounceMarker, CharType, DefaultSize, Force, Location, MaterialResource, ObjectMarker, Velocity,
+};
 use bevy::prelude::*;
-use crate::world::{Velocity, MaterialResource, DefaultSize, ObjectMarker, BounceMarker, Location, Force, CharType};
-use crate::walls::{WallMarker, WallDeathMarker};
 use bevy::sprite::collide_aabb::{collide, Collision};
 use rand::distributions::Uniform;
 use rand::{thread_rng, Rng};
-use crate::player::PlayerMarker;
 
 const BOUNCING_ENEMY_SIZE: f32 = 20f32;
 const BOUNCING_ENEMY_VELOCITY: f32 = 225f32;
 const TEAM: u8 = 1;
-
 
 const HOMING_MINE_SIZE: f32 = 20f32;
 const HOMING_MINE_FORCE: f32 = 125f32;
@@ -47,8 +48,10 @@ pub fn new_bouncing_enemy(material: Handle<ColorMaterial>, location: Vec2) -> Bo
             height: BOUNCING_ENEMY_SIZE,
         },
         sprite: sprite_bundle,
-        velocity: Velocity(Vec2::new(sin_cos.0 * BOUNCING_ENEMY_VELOCITY,
-                                     sin_cos.1 * BOUNCING_ENEMY_VELOCITY)),
+        velocity: Velocity(Vec2::new(
+            sin_cos.0 * BOUNCING_ENEMY_VELOCITY,
+            sin_cos.1 * BOUNCING_ENEMY_VELOCITY,
+        )),
         location: Location(location),
     };
     bouncing_enemy_bundle
@@ -65,7 +68,6 @@ pub fn move_bouncing_enemy(
         location.0.y += move_amt.y;
     }
 }
-
 
 pub struct HomingMineMarker;
 
@@ -106,8 +108,10 @@ pub fn new_homing_mine(material: Handle<ColorMaterial>, location: Vec2) -> Homin
     homing_mine_bundle
 }
 
-pub fn update_mines(mut homing_mines: Query<(&HomingMineMarker, &Location, &mut Force)>,
-                    mut player: Query<(&PlayerMarker, &Location)>) {
+pub fn update_mines(
+    mut homing_mines: Query<(&HomingMineMarker, &Location, &mut Force)>,
+    mut player: Query<(&PlayerMarker, &Location)>,
+) {
     if let Ok((_, player_loc)) = player.single_mut() {
         for (_, mine_loc, mut force) in homing_mines.iter_mut() {
             if mine_loc.0.distance_squared(player_loc.0) < MINE_HOME_DISTANCE * MINE_HOME_DISTANCE {
@@ -117,8 +121,10 @@ pub fn update_mines(mut homing_mines: Query<(&HomingMineMarker, &Location, &mut 
     }
 }
 
-pub fn homing_mine_spin(time: Res<Time>,
-                        mut homing_mines: Query<(&HomingMineMarker, &mut Transform)>) {
+pub fn homing_mine_spin(
+    time: Res<Time>,
+    mut homing_mines: Query<(&HomingMineMarker, &mut Transform)>,
+) {
     let delta_seconds = time.delta_seconds();
     for (_, mut transform) in homing_mines.iter_mut() {
         transform.rotate(Quat::from_rotation_z(delta_seconds * MINE_SPIN_SPEED));

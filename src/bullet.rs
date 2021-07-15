@@ -1,6 +1,9 @@
-use bevy::prelude::*;
-use crate::world::{BounceMarker, Velocity, ObjectMarker, DefaultSize, MaterialResource, Location, Counter, CharType};
 use crate::player::PLAYER_SIZE;
+use crate::world::{
+    BounceMarker, CharType, Counter, DefaultSize, Location, MaterialResource, ObjectMarker,
+    Velocity,
+};
+use bevy::prelude::*;
 
 const SIZE: f32 = 7.5f32;
 const BULLET_VELOCITY: f32 = 275f32;

@@ -1,7 +1,13 @@
-use bevy::prelude::*;
+use crate::world::{MaterialResource, ARENA_SIZE};
 use crate::GameState;
+use bevy::prelude::*;
 use bevy::text::Text2dSize;
-use crate::world::{ARENA_SIZE, MaterialResource};
+use bevy::window::WindowMode;
+
+pub fn set_windows(mut windows: ResMut<Windows>) {
+    let window = windows.get_primary_mut().unwrap();
+    window.set_title("switch".to_string());
+}
 
 pub struct DefaultFontSize(pub f32);
 
@@ -19,7 +25,6 @@ pub struct Chrono(pub f32);
 pub struct GameStartTimer {
     pub current_time: Chrono,
 }
-
 
 pub struct TimerUIMarker;
 
@@ -58,21 +63,24 @@ pub fn init_timer(mut commands: Commands, fonts: Res<Fonts>) {
         size: DefaultFontSize(80.0),
         text: text_bundle,
     });
-    commands.insert_resource(GameStartTimer { current_time: Chrono(0f32) });
+    commands.insert_resource(GameStartTimer {
+        current_time: Chrono(0f32),
+    });
 }
 
-pub fn remove_timer(mut commands: Commands,
-                    timer_ui: Query<(Entity, &TimerUIMarker)>) {
+pub fn remove_timer(mut commands: Commands, timer_ui: Query<(Entity, &TimerUIMarker)>) {
     if let Ok((entity, _)) = timer_ui.single() {
         commands.entity(entity).despawn_recursive();
     }
     commands.remove_resource::<GameStartTimer>();
 }
 
-pub fn timer(time: Res<Time>,
-             mut game_time: ResMut<GameStartTimer>,
-             mut timer_ui: Query<(&TimerUIMarker, &mut Text)>,
-             mut best_time: ResMut<BestTime>) {
+pub fn timer(
+    time: Res<Time>,
+    mut game_time: ResMut<GameStartTimer>,
+    mut timer_ui: Query<(&TimerUIMarker, &mut Text)>,
+    mut best_time: ResMut<BestTime>,
+) {
     game_time.current_time.0 += time.delta_seconds();
     best_time.0 = game_time.current_time.0.max(best_time.0);
     if let Ok((_, mut text)) = timer_ui.single_mut() {
@@ -80,19 +88,22 @@ pub fn timer(time: Res<Time>,
     }
 }
 
-
-pub struct PressSpaceToPlayMarker;
+pub struct LeftClickToPlayMarker;
 
 #[derive(Bundle)]
-pub struct PressSpaceToPlay {
-    marker: PressSpaceToPlayMarker,
+pub struct LeftClickToPlay {
+    marker: LeftClickToPlayMarker,
     pub size: DefaultFontSize,
     #[bundle]
     text: Text2dBundle,
 }
 
-pub fn init_press_space_to_play(mut commands: Commands, fonts: Res<Fonts>, best_time: Option<ResMut<BestTime>>) {
-    let mut text = "Press Space To Play".to_string();
+pub fn init_press_space_to_play(
+    mut commands: Commands,
+    fonts: Res<Fonts>,
+    best_time: Option<ResMut<BestTime>>,
+) {
+    let mut text = "Click To Play".to_string();
     if let Some(best_time) = best_time {
         text += &format!(" (Best: {:.1})", best_time.0);
     }
@@ -112,34 +123,36 @@ pub fn init_press_space_to_play(mut commands: Commands, fonts: Res<Fonts>, best_
         text,
         ..Default::default()
     };
-    commands.spawn_bundle(PressSpaceToPlay {
-        marker: PressSpaceToPlayMarker,
+    commands.spawn_bundle(LeftClickToPlay {
+        marker: LeftClickToPlayMarker,
         size: DefaultFontSize(40.0),
         text: text_bundle,
     });
 }
 
-pub fn update_press_space_to_play(mut game_state: ResMut<State<GameState>>,
-                                  keyboard: Res<Input<KeyCode>>) {
+pub fn update_left_click_to_play(
+    mut game_state: ResMut<State<GameState>>,
+    mouse: Res<Input<MouseButton>>,
+) {
     if let &GameState::Menu = game_state.current() {
-        if keyboard.just_pressed(KeyCode::Space) {
+        if mouse.just_released(MouseButton::Left) {
             game_state.set(GameState::Game).unwrap();
         }
     }
 }
 
-pub fn remove_press_space_to_play(mut commands: Commands,
-                                  space_to_play: Query<(Entity, &PressSpaceToPlayMarker)>) {
+pub fn remove_left_click_to_play(
+    mut commands: Commands,
+    space_to_play: Query<(Entity, &LeftClickToPlayMarker)>,
+) {
     if let Ok((entity, _)) = space_to_play.single() {
         commands.entity(entity).despawn_recursive();
     }
 }
 
-
 pub struct BestTime(pub f32);
 
-pub fn ui_scaling(windows: Res<Windows>,
-                  mut q: Query<(&DefaultFontSize, &mut Text)>) {
+pub fn ui_scaling(windows: Res<Windows>, mut q: Query<(&DefaultFontSize, &mut Text)>) {
     let window = windows.get_primary().unwrap();
 
     let min = window.width().min(window.height());
@@ -173,7 +186,8 @@ pub fn init_ui_background(mut commands: Commands, material: Res<MaterialResource
 
 pub fn ui_background_scaling(
     windows: Res<Windows>,
-    mut background: Query<(&UiBackgroundMarker, &mut Sprite)>) {
+    mut background: Query<(&UiBackgroundMarker, &mut Sprite)>,
+) {
     let window = windows.get_primary().unwrap();
 
     if let Ok((_, mut sprite)) = background.single_mut() {
