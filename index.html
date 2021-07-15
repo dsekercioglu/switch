@@ -1,12 +1,20 @@
 <html>
+
 <head>
     <title>switch</title>
+    <style>
+        canvas {
+            max-height: 98vh !important;
+            height: 56.25vw !important;
+            width: 100% !important;
+        }
+    </style>
 </head>
 <body>
-<script type="module">
-    import init from "./target/wasm.js";
+    <script type="module">
+        import init from "./target/wasm.js";
 
-    init();
-</script>
+        init();
+    </script>
 </body>
 </html>
